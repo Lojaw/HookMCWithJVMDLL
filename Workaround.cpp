@@ -5,262 +5,202 @@
 #include "chrono"
 
 #include "Windows.h"
+#include <fstream>
+#include <unordered_set>
+#include <mutex>
 
-//
-jclass getMinecraftClass1_8_9() {
-    jclass cls = ct.env->FindClass("ave");
-    if (cls == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
+std::unordered_set<std::string> logCache;
+std::mutex logMutex;
+
+void logMessage(const std::string& message) {
+    std::lock_guard<std::mutex> lock(logMutex);
+
+    // Überprüfen, ob die Nachricht bereits geloggt wurde
+    if (logCache.find(message) != logCache.end()) {
+        return; // Bereits geloggt, nichts zu tun
     }
-    return cls;
+
+    // Nachricht in die Datei schreiben
+    std::ofstream logFile("C:\\Users\\jpsch\\Desktop\\C++\\HookMCWithJVMDLL\\logging.txt", std::ios::app);
+    if (logFile.is_open()) {
+        logFile << message << std::endl;
+        logFile.close();
+    }
+
+    // Nachricht zum Cache hinzufügen
+    logCache.insert(message);
 }
 
-jobject getMinecraft1_8_9() {
-    jmethodID getMinecraftMethod = ct.env->GetStaticMethodID(getMinecraftClass1_8_9(), "A", "()Lave;");
-    if (getMinecraftMethod == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
-    return ct.env->CallStaticObjectMethod(getMinecraftClass1_8_9(), getMinecraftMethod);
+void clearLogFile() {
+    std::lock_guard<std::mutex> lock(logMutex);
+    std::ofstream logFile("C:\\Users\\jpsch\\Desktop\\C++\\HookMCWithJVMDLL\\logging.txt", std::ios::trunc);
+    logFile.close();
+    logCache.clear();
 }
 
-jobject getWorld1_8_9() {
-    jclass minecraftClass = getMinecraftClass1_8_9();
-    if (minecraftClass == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
 
-    jfieldID getWorldField = ct.env->GetFieldID(minecraftClass, "f", "Lbdb;");
-    if (getWorldField == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
 
-    jobject minecraftInstance = getMinecraft1_8_9();
-    if (minecraftInstance == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
-
-    jobject world = ct.env->GetObjectField(minecraftInstance, getWorldField);
-    if (world == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
-
-    return world;
-}
-
-jobject getPlayer1_8_9() {
-    jclass minecraftClass = getMinecraftClass1_8_9();
-    if (minecraftClass == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
-
-    jfieldID getPlayerField = ct.env->GetFieldID(minecraftClass, "h", "Lbew;");
-    if (getPlayerField == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
-
-    jobject minecraftInstance = getMinecraft1_8_9();
-    if (minecraftInstance == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
-
-    jobject player = ct.env->GetObjectField(minecraftInstance, getPlayerField);
-    if (player == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return nullptr;
-    }
-
-    return player;
-}
-
-void setPlayerSprint1_8_9() {
-    if (!GetAsyncKeyState('W') || GetAsyncKeyState('S') || GetAsyncKeyState(VK_LCONTROL)) return;
-
-    jobject player = getPlayer1_8_9();
-    if (player == nullptr) return;
-
-    jclass playerClass = ct.env->GetObjectClass(player);
-    if (playerClass == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return;
-    }
-
-    jmethodID setSprintingMethod = ct.env->GetMethodID(playerClass, "d", "(Z)V");
-    if (setSprintingMethod == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return;
-    }
-
-    ct.env->CallBooleanMethod(player, setSprintingMethod, true);
-    if (ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-    }
-}
-//
-
-jobject getMinecraftClientInstance1_20_4() {
-    jclass minecraftClientClass = ct.env->FindClass("net/minecraft/class_310");
+// Funktion, um die Minecraft-Instanz zu erhalten
+jobject getMinecraftClientInstance1_20_2() {
+    jclass minecraftClientClass = ct.env->FindClass("eqv");
     if (minecraftClientClass == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: MinecraftClientClass1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return nullptr;
     }
+    logMessage("Found: MinecraftClientClass1_20_2");
 
-    jmethodID getInstanceMethod = ct.env->GetStaticMethodID(minecraftClientClass, "method_1551", "()Lnet/minecraft/class_310;");
+    jmethodID getInstanceMethod = ct.env->GetStaticMethodID(minecraftClientClass, "O", "()Leqv;");
     if (getInstanceMethod == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: GetInstanceMethod1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return nullptr;
     }
+    logMessage("Found: GetInstanceMethod1_20_2");
 
     jobject minecraftClientInstance = ct.env->CallStaticObjectMethod(minecraftClientClass, getInstanceMethod);
     if (minecraftClientInstance == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: MinecraftClientInstance1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return nullptr;
     }
+    logMessage("Found: MinecraftClientInstance1_20_2");
 
     return minecraftClientInstance;
 }
 
-jobject getPlayer1_20_4() {
-    jobject minecraftClientInstance = getMinecraftClientInstance1_20_4();
-    if (minecraftClientInstance == nullptr) return nullptr;
+// Funktion, um das Spielerobjekt zu erhalten
+jobject getPlayer1_20_2() {
+    jobject minecraftClientInstance = getMinecraftClientInstance1_20_2();
+    if (minecraftClientInstance == nullptr) {
+        logMessage("Error: MinecraftClientInstance1_20_2 is null in getPlayer1_20_2");
+        return nullptr;
+    }
 
     jclass minecraftClientClass = ct.env->GetObjectClass(minecraftClientInstance);
     if (minecraftClientClass == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: MinecraftClientClass not found or exception in getPlayer1_20_2");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return nullptr;
     }
 
-    jfieldID playerFieldID = ct.env->GetFieldID(minecraftClientClass, "field_1724", "Lnet/minecraft/class_746;");
+    jfieldID playerFieldID = ct.env->GetFieldID(minecraftClientClass, "s", "Lfng;"); //@Nullable public LocalPlayer player;
     if (playerFieldID == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: PlayerFieldID1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return nullptr;
     }
+    logMessage("Found: PlayerFieldID1_20_2");
 
     jobject playerObject = ct.env->GetObjectField(minecraftClientInstance, playerFieldID);
     if (playerObject == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: PlayerObject1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return nullptr;
     }
+    logMessage("Found: PlayerObject1_20_2");
 
     return playerObject;
 }
 
-bool isForwardKeyPressed1_20_4() {
-    jobject minecraftClientInstance = getMinecraftClientInstance1_20_4();
-    if (minecraftClientInstance == nullptr) return false;
+// Funktion, um den Sprint-Status des Spielers zu setzen
+void setPlayerSprint1_20_2() {
+    jobject minecraftClientInstance = getMinecraftClientInstance1_20_2();
+    if (minecraftClientInstance == nullptr) {
+        logMessage("Error: MinecraftClientInstance1_20_2 is null in setPlayerSprint1_20_2");
+        return;
+    }
 
     jclass minecraftClientClass = ct.env->GetObjectClass(minecraftClientInstance);
     if (minecraftClientClass == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: MinecraftClientClass not found or exception in setPlayerSprint1_20_2");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
-        return false;
+        return;
     }
 
-    jfieldID optionsFieldID = ct.env->GetFieldID(minecraftClientClass, "field_1690", "Lnet/minecraft/class_315;");
+    jfieldID optionsFieldID = ct.env->GetFieldID(minecraftClientClass, "m_90857_", "Lnet/minecraft/class_315;"); // isDown
     if (optionsFieldID == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: OptionsFieldID1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
-        return false;
+        return;
     }
+    logMessage("Found: OptionsFieldID1_20_2");
 
     jobject optionsObject = ct.env->GetObjectField(minecraftClientInstance, optionsFieldID);
     if (optionsObject == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: OptionsObject1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
-        return false;
+        return;
     }
+    logMessage("Found: OptionsObject1_20_2");
 
     jclass optionsClass = ct.env->GetObjectClass(optionsObject);
-    jfieldID forwardKeyFieldID = ct.env->GetFieldID(optionsClass, "field_1894", "Lnet/minecraft/class_304;");
-    if (forwardKeyFieldID == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return false;
-    }
-
-    jobject forwardKeyObject = ct.env->GetObjectField(optionsObject, forwardKeyFieldID);
-    if (forwardKeyObject == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return false;
-    }
-
-    jclass keyBindingClass = ct.env->GetObjectClass(forwardKeyObject);
-    jmethodID isPressedMethod = ct.env->GetMethodID(keyBindingClass, "method_1434", "()Z");
-    if (isPressedMethod == nullptr || ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return false;
-    }
-
-    jboolean isPressed = ct.env->CallBooleanMethod(forwardKeyObject, isPressedMethod);
-    if (ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
-        return false;
-    }
-
-    return isPressed;
-}
-
-void setPlayerSprint1_20_4() {
-    if (!isForwardKeyPressed1_20_4()) return;
-
-    jobject player = getPlayer1_20_4();
-    if (player == nullptr) return;
-
-    jclass entityClass = ct.env->FindClass("net/minecraft/class_1297");
-    if (entityClass == nullptr || ct.env->ExceptionCheck()) {
+    if (optionsClass == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: OptionsClass1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return;
     }
+    logMessage("Found: OptionsClass1_20_2");
 
-    jmethodID setSprintingMethod = ct.env->GetMethodID(entityClass, "method_5728", "(Z)V");
-    if (setSprintingMethod == nullptr || ct.env->ExceptionCheck()) {
+    jmethodID isDownMethod = ct.env->GetMethodID(optionsClass, "m_90857_", "()Z"); // isDown
+    if (isDownMethod == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: IsDownMethod1_20_2 not found or exception occurred");
         ct.env->ExceptionDescribe();
         ct.env->ExceptionClear();
         return;
     }
+    logMessage("Found: IsDownMethod1_20_2");
 
-    ct.env->CallBooleanMethod(player, setSprintingMethod, true);
-    if (ct.env->ExceptionCheck()) {
-        ct.env->ExceptionDescribe();
-        ct.env->ExceptionClear();
+    jboolean isDown = ct.env->CallBooleanMethod(optionsObject, isDownMethod);
+    if (isDown) {
+        jobject playerObject = getPlayer1_20_2();
+        if (playerObject == nullptr) {
+            logMessage("Error: PlayerObject is null in setPlayerSprint1_20_2");
+            return;
+        }
+
+        jclass entityClass = ct.env->FindClass("cbu"); // Player.java
+        if (entityClass == nullptr || ct.env->ExceptionCheck()) {
+            logMessage("Error: EntityClass1_20_2 not found or exception occurred");
+            ct.env->ExceptionDescribe();
+            ct.env->ExceptionClear();
+            return;
+        }
+        logMessage("Found: EntityClass1_20_2");
+
+        jmethodID setSprintingMethod = ct.env->GetMethodID(entityClass, "m_150059_", "(Z)V"); // setSprinting
+        if (setSprintingMethod == nullptr || ct.env->ExceptionCheck()) {
+            logMessage("Error: SetSprintingMethod1_20_2 not found or exception occurred");
+            ct.env->ExceptionDescribe();
+            ct.env->ExceptionClear();
+            return;
+        }
+        logMessage("Found: SetSprintingMethod1_20_2");
+
+        ct.env->CallVoidMethod(playerObject, setSprintingMethod, true);
+        if (ct.env->ExceptionCheck()) {
+            logMessage("Error: Exception occurred during setSprinting call");
+            ct.env->ExceptionDescribe();
+            ct.env->ExceptionClear();
+        }
     }
 }
 
 void runModules()
 {
     while (true) {
-        setPlayerSprint1_8_9();
+        //setPlayerSprint1_8_9();
+        setPlayerSprint1_20_2();
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }

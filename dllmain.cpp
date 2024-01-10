@@ -2,8 +2,10 @@
 #include "Windows.h";
 #include "Java.h"
 #include "Workaround.h"
+#include "Workaround.cpp"
 
 void initialise() {
+    clearLogFile();
     jsize count;
 
     if (JNI_GetCreatedJavaVMs(&ct.vm, 1, &count) != JNI_OK || count == 0)
