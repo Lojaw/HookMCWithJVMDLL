@@ -3,6 +3,7 @@
 #include "Java.h"
 #include "Workaround.h"
 #include "Workaround.cpp"
+#include "MinecraftHook.h"
 
 void initialise() {
     clearLogFile();
@@ -30,9 +31,11 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
         CreateThread(0, 0, (LPTHREAD_START_ROUTINE)initialise, 0, 0, 0);
+        MinecraftHook::InitializeHook();
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
+        MinecraftHook::UninitializeHook();
         break;
     }
     return TRUE;

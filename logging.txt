@@ -1,16 +1,27 @@
-found getMinecraftClass1_8_9
-found minecraftClass1_8_9
-not found getPlayerField1_8_9
+runModules wird aufgerufen...
+Initializing...
+Found: WindowClass (ekt)
+Found: WindowMethod (constructor)
+Window method found and ready to be invoked.
+Initialization complete
+Found: InGameHudClass1_20_2 (ese)
+Found: RenderMethod1_20_2 (a)
 Found: MinecraftClientClass1_20_2
 Found: GetInstanceMethod1_20_2
+Error: MinecraftClientInstance1_20_2 not found or exception occurred
+Error: MinecraftClientInstance1_20_2 is null in setPlayerSprint1_20_2
 Found: MinecraftClientInstance1_20_2
 Found: OptionsFieldID1_20_2
+Error: OptionsObject1_20_2 not found or exception occurred
 Found: OptionsObject1_20_2
 Found: OptionsClass1_20_2
 Found: KeyUpFieldID1_20_2
 Found: KeyUpObject1_20_2
 Found: KeyMappingClass1_20_2
 Found: IsDownMethod1_20_2
+found getMinecraftClass1_8_9
+found minecraftClass1_8_9
+not found getPlayerField1_8_9
 Found: PlayerFieldID1_20_2
 Found: PlayerObject1_20_2
 Found: EntityClass1_20_2

@@ -8,6 +8,8 @@
 #include <fstream>
 #include <unordered_set>
 #include <mutex>
+#include <GL/glew.h>
+#include <GL/gl.h>
 
 std::unordered_set<std::string> logCache;
 std::mutex logMutex;
@@ -345,11 +347,143 @@ void setPlayerSprint1_20_2() {
     }
 }
 
+jmethodID getRenderMethod1_20_2() {
+    jclass inGameHudClass = ct.env->FindClass("ese");
+    if (inGameHudClass == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: InGameHudClass1_20_2 (ese) not found or exception in getRenderMethod1_20_2");
+        ct.env->ExceptionDescribe();
+        ct.env->ExceptionClear();
+        return nullptr;
+    }
+    logMessage("Found: InGameHudClass1_20_2 (ese)");
+
+    jmethodID renderMethodID = ct.env->GetMethodID(inGameHudClass, "a", "(Lesf;F)V");
+    if (renderMethodID == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: RenderMethod1_20_2 (a) not found or exception occurred");
+        ct.env->ExceptionDescribe();
+        ct.env->ExceptionClear();
+        return nullptr;
+    }
+    logMessage("Found: RenderMethod1_20_2 (a)");
+
+    return renderMethodID;
+}
+
+void customRender() {
+    // Stellen Sie sicher, dass Sie im richtigen OpenGL-Kontext sind
+    // und dass alle benötigten OpenGL-Initialisierungen durchgeführt wurden.
+
+    // Hier beginnt Ihre OpenGL-Renderlogik
+
+    float x1 = 0.0f, y1 = 0.0f, z1 = 0.0f; // Startpunkt der Linie
+    float x2 = 5.0f, y2 = 5.0f, z2 = 5.0f; // Endpunkt der Linie
+
+    glBegin(GL_LINES);
+    glVertex3f(x1, y1, z1); // Punkt 1 der Linie
+    glVertex3f(x2, y2, z2); // Punkt 2 der Linie
+    glEnd();
+    // OpenGL-Renderlogik endet hier
+}
+
+jclass getWindowClass() {
+    jclass windowClass = ct.env->FindClass("ekt");
+    if (windowClass == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: WindowClass (ekt) not found or exception in getWindowClass");
+        ct.env->ExceptionDescribe();
+        ct.env->ExceptionClear();
+        return nullptr;
+    }
+    logMessage("Found: WindowClass (ekt)");
+
+    return windowClass;
+}
+
+jmethodID getWindowMethod(jclass windowClass) {
+    if (windowClass == nullptr) {
+        logMessage("Error: WindowClass is null in getWindowMethod");
+        return nullptr;
+    }
+
+    // Angepasste JNI Signatur basierend auf den bereitgestellten Informationen
+    jmethodID windowMethodID = ct.env->GetMethodID(windowClass, "<init>", "(Leku;Lekr;Lekg;Ljava/lang/String;Ljava/lang/String;)V");
+    if (windowMethodID == nullptr || ct.env->ExceptionCheck()) {
+        logMessage("Error: WindowMethod (constructor) not found or exception occurred");
+        ct.env->ExceptionDescribe();
+        ct.env->ExceptionClear();
+        return nullptr;
+    }
+    logMessage("Found: WindowMethod (constructor)");
+
+    return windowMethodID;
+}
+
+void initialize() {
+    logMessage("Initializing...");
+
+    jclass windowClass = getWindowClass();
+    if (windowClass == nullptr) {
+        logMessage("Error: Failed to initialize Window class");
+        return;
+    }
+
+    jmethodID windowMethodID = nullptr;
+
+    while (true) {
+        windowMethodID = getWindowMethod(windowClass);
+
+        if (windowMethodID != nullptr) {
+            logMessage("Window method found and ready to be invoked.");
+            // Hier können Sie die Methode ausführen oder weitere Aktionen durchführen
+            break; // Verlassen Sie die Schleife, wenn die Methode gefunden wurde
+        }
+        else {
+            logMessage("Attempting to find Window method...");
+            //std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Warten, um Ressourcen zu schonen
+        }
+    }
+
+    logMessage("Initialization complete");
+}
+
 void runModules()
 {
+    logMessage("runModules wird aufgerufen...");
+
+    initialize();
+
+    jmethodID renderMethodID = getRenderMethod1_20_2();
+    
+    //try {
+    //    GLenum glewStatus = glewInit();
+    //    if (glewStatus != GLEW_OK) {
+    //        std::string errorString = "GLEW initialization failed: " + std::string(reinterpret_cast<const char*>(glewGetErrorString(glewStatus)));
+    //        logMessage(errorString);
+    //        // Führen Sie hier weitere Bereinigungen durch, falls erforderlich
+    //        return;
+    //    }
+    //}
+    //catch (const std::exception& e) {
+    //    logMessage("Exception caught: " + std::string(e.what()));
+    //    // Führen Sie hier weitere Bereinigungen durch, falls erforderlich
+    //    return;
+    //}
+    //catch (...) {
+    //    logMessage("Unknown exception caught");
+    //    // Führen Sie hier weitere Bereinigungen durch, falls erforderlich
+    //    return;
+    //}
+
     while (true) {
         setPlayerSprint1_8_9();
         setPlayerSprint1_20_2();
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
+
+        // Beispiel, wie Sie renderMethodID verwenden könnten:
+        // Hinweis: Dies ist ein sehr vereinfachtes Beispiel und möglicherweise nicht direkt anwendbar
+        if (renderMethodID != nullptr) {
+            customRender();
+            logMessage("Found: RenderMethod1_20_2 (a)");
+        }
+
     }
 }
